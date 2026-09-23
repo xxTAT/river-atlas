@@ -1,0 +1,848 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: ViennaRNA-2.6.4
+%%CreationDate: Mon Jun  2 21:50:40 2025
+%%Title: RNA Secondary Structure Plot
+%%BoundingBox: 0 0 700 700
+%%DocumentFonts: Helvetica
+%%Pages: 1
+%%EndComments
+
+% Program options: 
+
+% To switch off outline pairs of sequence comment or
+% delete the appropriate line near the end of the file
+
+/RNAplot 100 dict def
+
+RNAplot begin
+
+%%BeginProlog
+
+/fsize  14 def
+/outlinecolor {0.2 setgray} bind def
+/paircolor    {0.2 setgray} bind def
+/seqcolor     {0   setgray} bind def
+/cshow  { dup stringwidth pop -2 div fsize -3 div rmoveto show} bind def
+/min { 2 copy gt { exch } if pop } bind def
+/max { 2 copy lt { exch } if pop } bind def
+/arccoords { % i j arccoords
+  % puts optimal x1 y1 x2 y2 coordinates used in bezier curves from i to j
+  % onto the stack
+  dup 3 -1 roll dup 4 -1 roll lt dup dup 5 2 roll {exch} if
+  dup 3 -1 roll dup 3 -1 roll exch sub 1 sub dup
+  4 -2 roll 5 -1 roll {exch} if 4 2 roll
+  sequence length dup 2 div exch 3 1 roll lt 
+  {exch 5 -1 roll pop 4 -2 roll exch 4 2 roll}
+  { 4 2 roll 5 -1 roll dup 6 1 roll {exch} if
+    4 -2 roll exch pop dup 3 -1 roll dup 4 1 roll
+    exch add 4 -1 roll dup 5 1 roll sub 1 sub
+    5 -1 roll not {4 -2 roll exch 4 2 roll} if
+  }ifelse
+   % compute the scalingfactor and prepare (1-sf) and sf*r
+  2 mul exch cpr 3 1 roll div dup
+  3 -1 roll mul exch 1 exch sub exch
+   % compute the coordinates
+  3 -1 roll 1 sub coor exch get aload pop % get coord for i
+  4 -1 roll dup 5 1 roll mul 3 -1 roll dup 4 1 roll add exch % calculate y1
+  4 -1 roll dup 5 1 roll mul 3 -1 roll dup 4 1 roll add exch % calculate x1
+  5 -1 roll 1 sub coor exch get aload pop % get coord for j
+  % duplicate j coord
+  dup 3 -1 roll dup 4 1 roll exch 8 2 roll
+  6 -1 roll dup 7 1 roll mul 5 -1 roll dup 6 1 roll add exch % calculate y2
+  6 -1 roll mul 5 -1 roll add exch % calculate x2
+  6 -2 roll % reorder
+} bind def
+/drawoutline {
+  gsave outlinecolor newpath
+  coor 0 get aload pop 0.8 0 360 arc % draw 5' circle of 1st sequence
+  currentdict /cutpoint known        % check if cutpoint is defined
+  {coor 0 cutpoint getinterval
+   {aload pop lineto} forall         % draw outline of 1st sequence
+   coor cutpoint 1 add get aload pop
+   2 copy moveto 0.8 0 360 arc       % draw 5' circle of 2nd sequence
+   coor cutpoint 1 add coor length cutpoint 1 add sub getinterval
+   {aload pop lineto} forall        % draw outline of 2nd sequence
+     } {
+        /i 0 def
+        coor {
+            /p coor i get def
+            /a arcs i get def
+            /l a length def
+            l 0 eq {
+                %% standard point... draw simple line
+                p 0 2 getinterval aload pop lineto
+            } {
+                %% point in loop... draw arc around loop center
+                /clockwise a 5 get def
+                clockwise 0.0000000 gt {
+                    a 0 5 getinterval aload pop arcn
+                } {
+                    a 0 5 getinterval aload pop arc
+                } ifelse
+            } ifelse
+            /i i 1 add def
+        } forall
+    }
+  ifelse
+  stroke grestore
+} bind def
+/drawpairs {
+  paircolor
+  0.7 setlinewidth
+  [9 3.01] 9 setdash
+  newpath
+  pairs {aload pop
+      currentdict (cpr) known
+      { exch dup
+        coor  exch 1 sub get aload pop moveto
+        exch arccoords curveto
+      }
+      { coor exch 1 sub get aload pop moveto
+        coor exch 1 sub get aload pop lineto
+      }ifelse
+  } forall
+  stroke
+} bind def
+% draw bases
+/drawbases {
+  [] 0 setdash
+  seqcolor
+  0
+  coor {
+    aload pop moveto
+    dup sequence exch 1 getinterval cshow
+    1 add
+  } forall
+  pop
+} bind def
+/init {
+  /Helvetica findfont fsize scalefont setfont
+  1 setlinejoin
+  1 setlinecap
+  0.8 setlinewidth
+  % find the coordinate range
+  /xmax -1000 def /xmin 10000 def
+  /ymax -1000 def /ymin 10000 def
+  coor {
+      aload pop
+      dup ymin lt {dup /ymin exch def} if
+      dup ymax gt {/ymax exch def} {pop} ifelse
+      dup xmin lt {dup /xmin exch def} if
+      dup xmax gt {/xmax exch def} {pop} ifelse
+  } forall
+  /size {xmax xmin sub ymax ymin sub max} bind def
+  /width {xmax xmin sub} bind def
+  /height {ymax ymin sub} bind def
+  10 10 translate
+  680 size 10 add div dup scale
+  size width sub width xmin sub xmax sub add 2 div 5 add
+  size height sub height ymin sub ymax sub add 2 div 5 add
+  translate
+} bind def
+% extra definitions for standard anotations
+/min { 2 copy gt { exch } if pop } bind def
+/BLACK { 0 0 0 } def
+/RED   { 1 0 0 } def
+/GREEN { 0 1 0 } def
+/BLUE  { 0 0 1 } def
+/WHITE { 1 1 1 } def
+/LabelFont { % font size LabelFont
+  exch findfont exch fsize mul scalefont setfont
+} bind def
+/Label { % i dx dy (text) Label
+  % write text at base i plus offset dx, dy
+  4 3 roll 1 sub coor exch get aload pop moveto
+  3 1 roll fsize mul exch fsize mul exch rmoveto
+  show
+} bind def
+/cmark { % i cmark   draw circle around base i
+  newpath 1 sub coor exch get aload pop
+  fsize 2 div 0 360 arc stroke
+} bind def
+/gmark { % i j c gmark
+  % draw basepair i,j with c counter examples in gray
+  gsave
+  3 min [0 0.33 0.66 0.9] exch get setgray
+  1 sub dup coor exch get aload pop moveto
+  sequence exch 1 getinterval cshow
+  1 sub dup coor exch get aload pop moveto
+  sequence exch 1 getinterval cshow
+  grestore
+} bind def
+/segmark { % f i j lw r g b segmark
+  % mark segment [i,j] with outline width lw and color rgb
+  % use omark and Fomark instead
+  gsave
+  setrgbcolor setlinewidth
+  newpath
+  1 sub exch 1 sub dup
+  coor exch get aload pop moveto
+  currentdict (cpr) known
+  {
+    3 -1 roll dup 4 1 roll dup
+    {
+      3 1 roll dup 3 -1 roll dup
+      4 1 roll exch 5 2 roll exch
+    }
+    {
+      3 1 roll exch
+    } ifelse
+    1 exch { coor exch get aload pop lineto } for
+    {
+      dup 3 1 roll 1 add exch 1 add arccoords pop pop
+      4 2 roll 5 -1 roll coor exch get aload pop curveto
+    } if
+  }
+  {
+    exch 1 exch {
+      coor exch get aload pop lineto
+    } for
+  } ifelse
+  { closepath fill } if  stroke
+  grestore
+} bind def
+/omark { % i j lw r g b omark
+  % stroke segment [i..j] with linewidth lw, color rgb
+  false 7 1 roll segmark
+} bind def
+/Fomark { % i j r g b Fomark
+  % fill segment [i..j] with color rgb
+  % should precede drawbases
+  1 4 1 roll true 7 1 roll segmark
+} bind def
+/BFmark{ % i j k l r g b BFmark
+  % fill block between pairs (i,j) and (k,l) with color rgb
+  % should precede drawbases
+  gsave
+  setrgbcolor
+  newpath
+  currentdict (cpr) known
+  {
+    dup 1 sub coor exch get aload pop moveto % move to l
+    dup 1 sub 4 -1 roll dup 5 1 roll 1 sub 1 exch
+    { coor exch get aload pop lineto } for % lines from l to j
+    3 -1 roll 4 -1 roll dup 5 1 roll arccoords curveto % curve from j to i
+    exch dup 4 -1 roll 1 sub exch 1 sub 1 exch
+    { coor exch get aload pop lineto } for % lines from i to k
+    exch arccoords curveto% curve from k to l
+  }
+  {  exch 4 3 roll exch 1 sub exch 1 sub dup
+     coor exch get aload pop moveto
+     exch 1 exch { coor exch get aload pop lineto } for
+     exch 1 sub exch 1 sub dup
+     coor exch get aload pop lineto
+     exch 1 exch { coor exch get aload pop lineto } for
+  } ifelse
+    closepath fill stroke
+   grestore
+} bind def
+/hsb {
+  dup 0.3 mul 1 exch sub sethsbcolor
+} bind def
+/colorpair { % i j hue sat colorpair
+  % draw basepair i,j in color
+  % 1 index 0.00 ne {
+  gsave
+  newpath
+  hsb
+  fsize setlinewidth
+  currentdict (cpr) known
+  {
+    exch dup
+    coor  exch 1 sub get aload pop moveto
+    exch arccoords curveto
+  }
+  { 1 sub coor exch get aload pop moveto
+    1 sub coor exch get aload pop lineto
+  } ifelse
+   stroke
+   grestore
+   % } if
+} bind def
+
+%%EndProlog
+
+% data start here
+/cutpoint 132 def
+/sequence { (\
+UCAAAUGAUUACCUUAAAGCACACGGUCCCAUUAAAGUUGGACGUGGUGUCAUGUUGGAGGCAUUAGGUCUUAAGGUCUUUAAUGUUGUUGGUCCACGUAAGGGUAAGCAUGCACCUGAGCUUCUUGUUAAG AGUGUUAAGGCUGUUAAAGUAGAAUCCACUGUUACUUAUGGACAACAAAUUGGACCUUGUCUUGUUAAUGACACCGUUGUCACAGACAACAAACCUGUUGUUGCUGAUGUUG\
+) } def
+/len { sequence length } bind def
+
+/coor [
+[72.79887390 772.60266113]
+[61.14691544 782.15924072]
+[47.60486984 788.77056885]
+[32.90304184 792.08007812]
+[17.83428192 791.90936279]
+[3.21122718 788.26751709]
+[-10.17751789 781.35095215]
+[-21.60991478 771.53277588]
+[-30.46942902 759.34240723]
+[-36.27827835 745.43719482]
+[-38.72319794 730.56713867]
+[-37.67233658 715.53411865]
+[-33.18236923 701.14880371]
+[-25.49542999 688.18701172]
+[-15.02606773 677.34777832]
+[-2.33888078 669.21563721]
+[11.88192654 664.22906494]
+[26.86944199 662.65710449]
+[28.77984428 647.77929688]
+[30.69024849 632.90142822]
+[32.60065079 618.02355957]
+[34.41601562 603.13385010]
+[36.13626480 588.23278809]
+[37.76133347 573.32110596]
+[39.19584274 558.38983154]
+[40.53498077 543.44976807]
+[41.87411880 528.50964355]
+[35.32704163 525.05047607]
+[29.91526604 519.95721436]
+[26.03787231 513.58587646]
+[23.98598289 506.38723755]
+[23.92093658 498.87530518]
+[25.86169243 491.59027100]
+[29.68244743 485.05990601]
+[35.12068558 479.76116943]
+[41.79518127 476.08541870]
+[49.23270416 474.30957031]
+[51.90028763 459.54867554]
+[54.56787109 444.78778076]
+[57.23545074 430.02688599]
+[59.43048859 415.18838501]
+[61.15073776 400.28735352]
+[62.87099075 385.38632202]
+[64.59123993 370.48529053]
+[56.76533890 354.76690674]
+[67.89282227 340.08175659]
+[69.42263794 325.15997314]
+[70.95246124 310.23818970]
+[72.48227692 295.31640625]
+[74.01210022 280.39462280]
+[75.54191589 265.47283936]
+[77.07173920 250.55105591]
+[78.60155487 235.62927246]
+[66.44931793 227.01599121]
+[60.19844818 213.38578796]
+[61.61872101 198.35749817]
+[70.42840576 185.97662354]
+[84.34313202 179.62622070]
+[85.87295532 164.70443726]
+[87.40277100 149.78265381]
+[88.93259430 134.86087036]
+[90.46240997 119.93908691]
+[91.99223328 105.01730347]
+[89.70065308 100.32667542]
+[90.18706512 94.68619537]
+[93.75642395 89.73568726]
+[95.66682434 74.85784149]
+[97.57722473 59.97998810]
+[99.48762512 45.10214233]
+[101.39803314 30.22429276]
+[103.30843353 15.34644604]
+[101.31376648 10.57250118]
+[101.33248901 5.96767712]
+[102.96707153 2.26592898]
+[105.58756256 -0.06053954]
+[108.06642151 -14.85429668]
+[110.54528809 -29.64805222]
+[99.06286621 -19.99641800]
+[84.10762024 -18.83853722]
+[71.27643585 -26.60774040]
+[65.37126160 -40.39646530]
+[68.60207367 -55.04439545]
+[79.75975800 -65.06966400]
+[94.66865540 -66.72039032]
+[107.74922180 -59.37881470]
+[114.10624695 -45.79180145]
+[118.08097076 -60.25560379]
+[122.05569458 -74.71940613]
+[126.03041840 -89.18320465]
+[130.00514221 -103.64701080]
+[133.97985840 -118.11080933]
+[133.23579407 -127.19113159]
+[138.09880066 -132.73332214]
+[142.25790405 -147.14518738]
+[146.41700745 -161.55705261]
+[150.57611084 -175.96891785]
+[144.87249756 -195.31929016]
+[159.42147827 -208.07579041]
+[163.21116638 -222.58917236]
+[167.00085449 -237.10253906]
+[170.79054260 -251.61592102]
+[166.79081726 -266.92321777]
+[177.49259949 -277.28277588]
+[181.28228760 -291.79617310]
+[185.07197571 -306.30953979]
+[172.58114624 -316.75305176]
+[165.92407227 -331.54757690]
+[166.38922119 -347.70590210]
+[173.83248901 -361.98971558]
+[186.71638489 -371.55847168]
+[202.42733765 -374.53439331]
+[206.03137207 -389.09500122]
+[209.63542175 -403.65560913]
+[197.01222229 -413.93872070]
+[190.16677856 -428.64703369]
+[190.42552185 -444.80999756]
+[197.68577576 -459.18768311]
+[210.44642639 -468.92016602]
+[226.11808777 -472.09652710]
+[229.53590393 -486.70193481]
+[232.95370483 -501.30737305]
+[236.37150574 -515.91284180]
+[239.78930664 -530.51824951]
+[226.95350647 -538.55072021]
+[217.42327881 -550.31738281]
+[212.23237610 -564.54174805]
+[211.94387817 -579.68096924]
+[216.58908081 -594.09277344]
+[225.66410828 -606.21392822]
+[238.18455505 -614.72967529]
+[252.79231262 -618.71612549]
+[267.90283203 -617.74102783]
+[281.87704468 -611.91003418]
+[293.19912720 -601.85571289]
+[300.64093018 -588.66870117]
+[303.39526367 -573.77935791]
+[301.16333008 -558.80279541]
+[294.18722534 -545.36358643]
+[283.22366333 -534.91949463]
+[269.46191406 -528.60339355]
+[254.39472961 -527.10046387]
+[250.97692871 -512.49499512]
+[247.55912781 -497.88958740]
+[244.14132690 -483.28414917]
+[240.72352600 -468.67871094]
+[251.92932129 -460.52001953]
+[259.20571899 -448.67138672]
+[261.42779541 -434.90173340]
+[258.22799683 -421.28143311]
+[250.05657959 -409.87127686]
+[238.11854553 -402.41043091]
+[224.19601440 -400.05154419]
+[220.59196472 -385.49096680]
+[216.98793030 -370.93035889]
+[228.08862305 -362.62924194]
+[235.21311951 -350.68865967]
+[237.25915527 -336.89172363]
+[233.88568115 -323.31341553]
+[225.56922913 -312.00851440]
+[213.53688049 -304.70074463]
+[199.58535767 -302.51986694]
+[195.79566956 -288.00646973]
+[192.00598145 -273.49310303]
+[196.27677917 -259.22390747]
+[185.30392456 -247.82623291]
+[181.51423645 -233.31285095]
+[177.72454834 -218.79946899]
+[173.93486023 -204.28608704]
+[179.85922241 -195.99525452]
+[180.26295471 -185.59382629]
+[174.77279663 -176.49305725]
+[164.98797607 -171.80981445]
+[160.82887268 -157.39794922]
+[156.66976929 -142.98608398]
+[152.51066589 -128.57421875]
+[148.44366455 -114.13608551]
+[144.46893311 -99.67228699]
+[140.49421692 -85.20848083]
+[136.51950073 -70.74468231]
+[132.54476929 -56.28087997]
+[128.57005310 -41.81707764]
+[125.33904266 -27.16918945]
+[122.86017609 -12.37543297]
+[120.38131714 2.41832328]
+[118.18627930 17.25684738]
+[116.27587891 32.13469696]
+[114.36547852 47.01254272]
+[112.45507050 61.89039230]
+[110.54467010 76.76824188]
+[108.63426971 91.64608765]
+[106.91401672 106.54711914]
+[105.38420105 121.46890259]
+[103.85437775 136.39068604]
+[102.32455444 151.31246948]
+[100.79473877 166.23425293]
+[99.26491547 181.15603638]
+[111.60160828 190.19779968]
+[117.71578217 204.10871887]
+[116.05709076 219.11254883]
+[107.17051697 231.19082642]
+[93.52333832 237.15910339]
+[91.99352264 252.08088684]
+[90.46369934 267.00265503]
+[88.93388367 281.92443848]
+[87.40406036 296.84622192]
+[85.87424469 311.76800537]
+[84.34442139 326.68981934]
+[82.81460571 341.61160278]
+[90.33078003 352.07482910]
+[88.76379395 364.45861816]
+[79.49227142 372.20553589]
+[77.77201843 387.10656738]
+[76.05177307 402.00759888]
+[74.33152008 416.90863037]
+[87.46315002 409.65878296]
+[101.36844635 415.28396606]
+[105.76583099 429.62493896]
+[97.40387726 442.07794189]
+[82.46541595 443.43527222]
+[71.99634552 432.69448853]
+[69.32876587 447.45538330]
+[66.66117859 462.21627808]
+[63.99359894 476.97717285]
+[78.76712036 494.71026611]
+[75.52732086 517.28820801]
+[56.81422424 529.84875488]
+[55.47508621 544.78887939]
+[54.13594818 559.72900391]
+[56.48297882 568.53222656]
+[52.68311691 574.85089111]
+[54.91754150 583.68341064]
+[51.03729630 589.95306396]
+[49.31704712 604.85406494]
+[51.43849182 613.71441650]
+[47.47849655 619.93395996]
+[45.56809616 634.81182861]
+[43.65769196 649.68969727]
+[41.74729156 664.56750488]
+[55.85144424 669.87506104]
+[68.35108948 678.29260254]
+[78.57212830 689.36633301]
+[85.96335602 702.49896240]
+[90.12618256 716.98229980]
+[90.83610535 732.03533936]
+[88.05483246 746.84619141]
+] def
+/arcs [
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+] def
+/pairs [
+[18 238]
+[19 237]
+[20 236]
+[21 235]
+[22 233]
+[23 232]
+[24 230]
+[25 228]
+[26 227]
+[27 226]
+[37 223]
+[38 222]
+[39 221]
+[40 220]
+[41 214]
+[42 213]
+[43 212]
+[44 211]
+[46 208]
+[47 207]
+[48 206]
+[49 205]
+[50 204]
+[51 203]
+[52 202]
+[53 201]
+[58 196]
+[59 195]
+[60 194]
+[61 193]
+[62 192]
+[63 191]
+[66 190]
+[67 189]
+[68 188]
+[69 187]
+[70 186]
+[71 185]
+[75 184]
+[76 183]
+[77 182]
+[86 181]
+[87 180]
+[88 179]
+[89 178]
+[90 177]
+[91 176]
+[93 175]
+[94 174]
+[95 173]
+[96 172]
+[98 168]
+[99 167]
+[100 166]
+[101 165]
+[103 163]
+[104 162]
+[105 161]
+[111 154]
+[112 153]
+[113 152]
+[119 145]
+[120 144]
+[121 143]
+[122 142]
+[123 141]
+] def
+
+init
+
+% Start Annotations
+1 132 9  0 0.9 0.2 omark
+134 245 9  1 0.1 0.2 omark
+
+% End Annotations
+% switch off outline pairs or bases by removing these lines
+drawoutline
+drawpairs
+drawbases
+showpage
+end
+%%EOF
