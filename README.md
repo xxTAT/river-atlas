@@ -3,7 +3,7 @@
 **An online atlas of interaction-supported RNA secondary structures, well-folded structures and alternative conformations inferred by RIVER from RNA–RNA proximity-ligation maps**
 [![Website](https://img.shields.io/badge/website-RIVER%20Atlas-blue)](https://xxtat.github.io/river-atlas/)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21543755-blue)](https://doi.org/10.5281/zenodo.21543755)
-[![Code](https://img.shields.io/badge/code-RIVER%20Atlas-blue)](https://github.com/xxTAT/RIVER)
+[![Code](https://img.shields.io/badge/code-RIVER-blue)](https://github.com/xxTAT/RIVER)
 
 **Browse the atlas:** <https://xxtat.github.io/river-atlas/>
 
