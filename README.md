@@ -4,6 +4,7 @@
 [![Website](https://img.shields.io/badge/website-RIVER%20Atlas-blue)](https://xxtat.github.io/river-atlas/)
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23658285-blue)](https://doi.org/10.5281/zenodo.23658285)
 [![Code](https://img.shields.io/badge/code-RIVER-blue)](https://github.com/xxTAT/RIVER)
+[![software](https://img.shields.io/badge/software-river_rna-blue)](https://github.com/xxTAT/riveer_rna)
 
 **Browse the atlas:** <https://xxtat.github.io/river-atlas/>
 
